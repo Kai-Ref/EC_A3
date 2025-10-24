@@ -144,20 +144,12 @@ def one_one_EA(func, budget = None):
         func.reset()
     return f_opt, x_opt  
 
-# Declaration of problems to be tested.
-get_problem(fid=2100, problem_class = ProblemClass.GRAPH)
-get_problem(fid=2101, problem_class = ProblemClass.GRAPH)
-get_problem(fid=2102, problem_class = ProblemClass.GRAPH)
-get_problem(fid=2103, problem_class = ProblemClass.GRAPH)
-
-get_problem(fid=2200, problem_class = ProblemClass.GRAPH)
-get_problem(fid=2201, problem_class = ProblemClass.GRAPH)
-get_problem(fid=2202, problem_class = ProblemClass.GRAPH)
-get_problem(fid=2203, problem_class = ProblemClass.GRAPH)
 
 parser = argparse.ArgumentParser(prog="PBO Exercise 3 Script", description="Tests RLS, (1+1), and GA on MaxCoverage, MaxInfluence, PackWhileTravel")
 parser.add_argument('function')
-#parser.add_argument('seed')
+parser.add_argument('seed')
+parser.add_argument('budget')
+
 
 problems = [get_problem(fid=2100, problem_class = ProblemClass.GRAPH),
 get_problem(fid=2101, problem_class = ProblemClass.GRAPH),
@@ -173,9 +165,13 @@ get_problem(fid=2302, problem_class = ProblemClass.GRAPH)
 ]
 
 if __name__ == "__main__":
+    #args should be "function, seed, budget" in that order
     args = parser.parse_args()
     
-    rng = np.random.default_rng(seed=50)
+    run_seed = int(args.seed)
+    run_budget = int(args.budget)
+
+    rng = np.random.default_rng(seed=run_seed)
 
     if args.function == "one" :
         algo_name = "(1+1)-EA"
@@ -195,10 +191,10 @@ if __name__ == "__main__":
     for f in problems:
         f.attach_logger(log)
         if args.function == "one" :
-            one_one_EA(f)
+            one_one_EA(f, budget=run_budget)
         elif args.function == "rls":
-            RLS_EA(f)
+            RLS_EA(f, budget=run_budget)
         elif args.function == "ga":
-            ga_uniform(f, budget=10000, mu=20, lambd=20, pc=1.0, pm=None, tour_k=3, elitism=True, runs=30)
+            ga_uniform(f, budget=run_budget, mu=20, lambd=20, pc=1.0, pm=None, tour_k=3, elitism=True, runs=30)
 
     del log
