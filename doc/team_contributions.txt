@@ -27,7 +27,9 @@ Dylan:
     - Ran RLS, (1+1) EA, and GA for the functions specified in Exercise 1 and Exercise 4
 
 Mercel:
-
+- Worked on Exercise 2
+    - Implementation of GSEMO algorithm
+    - Gathered all necessary data for analysis
 
 Raiyan:
 
