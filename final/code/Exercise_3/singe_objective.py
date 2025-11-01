@@ -437,6 +437,8 @@ def plot_comparison(all_results, problems, pop_sizes, mechanisms):
                        title_text="Progress Comparison Across Configurations")
     fig1.show()
 
+    fig1.write_image("comparison_plot.png", scale=10)
+
     # Plot 2: Final fitness box plots
     fig2 = go.Figure()
 
@@ -457,6 +459,8 @@ def plot_comparison(all_results, problems, pop_sizes, mechanisms):
                        template="plotly_white")
     fig2.show()
 
+    fig2.write_image("final_fitness_boxplot.png", scale=10)
+
 
 # ===== Main Execution =====
 if __name__ == "__main__":
@@ -472,19 +476,21 @@ if __name__ == "__main__":
     # print(f"Best fitness: {best_fit}")
     # print(f"Final diversity: {div_hist[-1]:.2f}")
 
-    # Run full experiments with multiprocessing
-    print("\n" + "=" * 60)
-    print("Starting full experiments with parallel processing...")
-    print("=" * 60 + "\n")
+    # # Run full experiments with multiprocessing
+    # print("\n" + "=" * 60)
+    # print("Starting full experiments with parallel processing...")
+    # print("=" * 60 + "\n")
+    #
+    # all_results = run_experiments(
+    #     problems=[2100, 2101, 2102, 2103],
+    #     pop_sizes=[10, 20, 50],
+    #     diversity_mechanisms=['fitness_sharing', 'crowding', 'niching', 'age'],
+    #     num_runs=30,
+    #     budget=10000,
+    #     n_jobs=None  # Uses cpu_count() - 1, or set to specific number like 4
+    # )
 
-    all_results = run_experiments(
-        problems=[2100, 2101, 2102, 2103],
-        pop_sizes=[10, 20, 50],
-        diversity_mechanisms=['fitness_sharing', 'crowding', 'niching', 'age'],
-        num_runs=30,
-        budget=10000,
-        n_jobs=None  # Uses cpu_count() - 1, or set to specific number like 4
-    )
+    all_results = pickle.load(open("../../../results/exercise3/single_objective/all_results.pkl", "rb"))
 
     # Generate plots
     print("\nGenerating comparison plots...")
