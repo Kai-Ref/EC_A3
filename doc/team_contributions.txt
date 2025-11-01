@@ -1,0 +1,29 @@
+Group Members:
+Reffert, Kai (a1989953)
+Sharada, Bangamuarachchi (a1874722)
+Csizmadia, Gabriel (a1852152)
+Glastonbury, Dylan (a1883934)
+Gern, Marcel (a1991159)
+Rahman, Md Raiyan (a1872756)
+
+Contributions:
+
+Kai:
+
+
+Sharada:
+
+
+Gabriel:
+
+
+Dylan:
+- Worked on Exercise 1 + 4
+    - Developed RLS, (1+1) EA, and GA from Exercise 1.
+    - Ran RLS, (1+1) EA, and GA for the functions specified in Exercise 1 and Exercise 4
+
+Mercel:
+
+
+Raiyan:
+
