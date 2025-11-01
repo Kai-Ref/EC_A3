@@ -1,0 +1,1 @@
+You need to call the script via a commandline (sh or powershell) and it takes three paramaters: function(one, rls, ga), the rng seed, and the budget size.
