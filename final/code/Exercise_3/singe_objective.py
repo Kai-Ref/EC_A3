@@ -99,7 +99,7 @@ def greedy_repair(problem, solution, B):
 
 # ===== Single-Objective EA with Diversity Mechanisms =====
 def single_objective_ea(
-        problem_id=2100,
+        problem_id=2200,
         pop_size=20,
         budget=10000,
         p_mut=None,
@@ -308,7 +308,7 @@ def run_single_experiment(args):
 
 
 def run_experiments(
-        problems=[2100, 2101, 2102, 2103],
+        problems=[2200, 2201, 2202, 2203],
         pop_sizes=[10, 20, 50],
         diversity_mechanisms=['fitness_sharing', 'crowding', 'niching', 'age'],
         num_runs=30,
@@ -437,8 +437,6 @@ def plot_comparison(all_results, problems, pop_sizes, mechanisms):
                        title_text="Progress Comparison Across Configurations")
     fig1.show()
 
-    fig1.write_image("comparison_plot.png", scale=10)
-
     # Plot 2: Final fitness box plots
     fig2 = go.Figure()
 
@@ -459,40 +457,36 @@ def plot_comparison(all_results, problems, pop_sizes, mechanisms):
                        template="plotly_white")
     fig2.show()
 
-    fig2.write_image("final_fitness_boxplot.png", scale=10)
-
 
 # ===== Main Execution =====
 if __name__ == "__main__":
     # Quick test on single problem
     # print("Running single test...")
     # best_fit, best_sol, best_vals, div_hist = single_objective_ea(
-    #     problem_id=2100,
-    #     pop_size=20,
-    #     budget=10000,
-    #     diversity_mechanism='fitness_sharing',
-    #     save_path="test_single.pkl"
+    #    problem_id=2200,
+    #    pop_size=20,
+    #    budget=10000,
+    #    diversity_mechanism='fitness_sharing',
+    #    save_path="test_single.pkl"
     # )
     # print(f"Best fitness: {best_fit}")
     # print(f"Final diversity: {div_hist[-1]:.2f}")
 
-    # # Run full experiments with multiprocessing
-    # print("\n" + "=" * 60)
-    # print("Starting full experiments with parallel processing...")
-    # print("=" * 60 + "\n")
-    #
-    # all_results = run_experiments(
-    #     problems=[2100, 2101, 2102, 2103],
-    #     pop_sizes=[10, 20, 50],
-    #     diversity_mechanisms=['fitness_sharing', 'crowding', 'niching', 'age'],
-    #     num_runs=30,
-    #     budget=10000,
-    #     n_jobs=None  # Uses cpu_count() - 1, or set to specific number like 4
-    # )
+    # Run full experiments with multiprocessing
+    print("\n" + "=" * 60)
+    print("Starting full experiments with parallel processing...")
+    print("=" * 60 + "\n")
 
-    all_results = pickle.load(open("../../../results/exercise3/single_objective/all_results.pkl", "rb"))
+    all_results = run_experiments(
+       problems=[2200, 2201, 2202, 2203],
+       pop_sizes=[10, 20, 50],
+       diversity_mechanisms=['fitness_sharing', 'age'],
+       num_runs=30,
+       budget=10000,
+       n_jobs=None  # Uses cpu_count() - 1, or set to specific number like 4
+   )
 
     # Generate plots
     print("\nGenerating comparison plots...")
-    plot_comparison(all_results, [2100, 2101, 2102, 2103], [10, 20, 50],
-                    ['fitness_sharing', 'crowding', 'niching', 'age'])
+    plot_comparison(all_results, [2200, 2201, 2202, 2203], [10, 20, 50],
+                    ['fitness_sharing', 'age'])
