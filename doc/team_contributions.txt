@@ -12,6 +12,10 @@ Kai:
 
 
 Sharada:
+- Worked on Exercise 1 + 2
+    - Exported all fixed-budget plots (mean ± SD) for RLS, (1+1) EA, GA, and GSEMO across all instances.
+    - Created and exported all first-run trade-off (Pareto) plots for Exercise 2.
+    - Completed the full analysis and comparison of results for both exercises, explaining algorithm performance, stability, and trends.
 
 
 Gabriel:
