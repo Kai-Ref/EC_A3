@@ -21,6 +21,9 @@ Sharada:
 
 
 Gabriel:
+- Worked on Exercise 3 + 4:
+    - Developed single-objective algorithm 
+    - Ran single-objective algorithem for the functions specified in Exercise 3 and Exercise 4.
 
 
 Dylan:
