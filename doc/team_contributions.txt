@@ -9,6 +9,8 @@ Rahman, Md Raiyan (a1872756)
 Contributions:
 
 Kai:
+- Worked on Exercise 3 + 4:
+    - implemented and ran all multi-objective experiments for both exercises
 
 
 Sharada:
