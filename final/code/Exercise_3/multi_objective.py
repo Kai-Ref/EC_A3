@@ -1,4 +1,5 @@
 import numpy as np
+import argparse
 import ioh
 from ioh import logger
 import random
@@ -9,7 +10,6 @@ import pickle
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 
-# ===== Utility functions =====
 # ===== Utility functions =====
 def evaluate_solution(problem, solution):
     f_val = problem(solution)
@@ -109,6 +109,7 @@ def multi_objective_ea(problem_id=2100, pop_size=20, budget=10000, p_mut=None, s
     pareto_front = [tuple(objs[i]) for i in pareto_idx]
 
     # Save results
+    os.makedirs(os.path.dirname(save_path), exist_ok=True)
     with open(save_path, "wb") as f:
         pickle.dump({"pareto": pareto_front, "best_f_vals": best_f_vals}, f)
 
@@ -136,7 +137,7 @@ def plot_pareto_front_plotly(pareto_data, problem_id):
     fig.update_layout(template="plotly_white")
     fig.show()
 
-def plot_progress_small_multiple(all_best_f_vals, problems, cols=4):
+def plot_progress_small_multiple(all_best_f_vals, problems, cols=4, img_path=""):
     """
     all_best_f_vals: dict {problem_id: list of best_f_vals per run}
     problems: list of problem IDs
@@ -187,9 +188,14 @@ def plot_progress_small_multiple(all_best_f_vals, problems, cols=4):
     fig.update_layout(height=300*rows, width=350*cols,
                       title_text="Progress Plots (Best–Worst Across Runs)", title_x=0.5,
                       showlegend=False)
-    fig.show()
+    
+    os.makedirs(img_path, exist_ok=True)
+    # save_plot_as_pdf(fig, f"{img_path}/progress_plot.pdf")
+    # fig.write_html(f"{img_path}/progress_plot.html")
+    fig.write_image(f"{img_path}/progress_plot.png")
+    # fig.show()
 
-def plot_pareto_small_multiple(all_pareto, problems, cols=4):
+def plot_pareto_small_multiple(all_pareto, problems, cols=4, img_path=""):
     """
     all_pareto: dict {problem_id: list of list of (f_val, cost) per run}
     """
@@ -219,45 +225,170 @@ def plot_pareto_small_multiple(all_pareto, problems, cols=4):
 
     fig.update_layout(height=300*rows, width=350*cols,
                       title_text="Fixed-Budget Pareto Fronts Across Runs", title_x=0.5)
-    fig.show()
-
+    
+    os.makedirs(img_path, exist_ok=True)
+    # save_plot_as_pdf(fig, f"{img_path}/pareto.pdf")
+    # fig.write_html(f"{img_path}/pareto.html")
+    fig.write_image(f"{img_path}/pareto.png")
+    # fig.show()
 
 
 
 # ===== Main =====
 if __name__ == "__main__":
-    rerun = False  # <-- Set to False to skip running EA and just plot saved results
+
+    parser = argparse.ArgumentParser(description="Run multi-objective EA experiments.")
+    parser.add_argument("--pop_size", type=int, default=10, help="Population size for the evolutionary algorithm (e.g., 10, 20, 50)")
+    parser.add_argument("--rerun", action="store_true", help="Re-run the EA even if saved results exist")
+    parser.add_argument("--save_path", type=str, default="", help="Base path for saving results and images")
+    parser.add_argument("--num_runs", type=int, default=30, help="Number of runs per problem instance")
+    parser.add_argument("--budget", type=int, default=100000, help="Evaluation budget for the evolutionary algorithm")
+    parser.add_argument("--instances", type=int, default=30, help="Number of instances to evaluate")
+    parser.add_argument("--problems", type=int, nargs='+', default=[2100, 2101, 2102, 2103, 2200, 2201, 2202, 2203], 
+                        help="List of problem IDs to solve (e.g., --problems 2100 2101 2102)")
+    # In the argument parser section
+    parser.add_argument("--run_id", type=int, default=None, help="Specific run ID to execute (0 to num_runs-1)")
+
+    # In the main section, replace the loop:
+    args = parser.parse_args()
+
+    # --- Assign arguments ---
+    pop_size = args.pop_size
+    rerun = args.rerun
+    save_path_ = args.save_path
+    num_runs_per_instance = args.num_runs
+    budget = args.budget
+    instances = args.instances
+    problems = args.problems
+    run_id = args.run_id
+
+    # -- set other parameters --
     all_best_f_vals = {}
     all_pareto = {}
-    num_runs_per_instance = 30
-    problems = [2100, 2101, 2102, 2103, 2200, 2201, 2202, 2203][0:1]
-    pop_size = 10 # 10, 20, 50
-    budget = 10000
-    instances = 30 #TODO
 
-    total_iterations = len(problems) * num_runs_per_instance
-    pbar = tqdm(total=total_iterations, desc="All Runs", ncols=100)
-
-    for problem_id in problems:
-        all_best_f_vals[problem_id] = []
-        all_pareto[problem_id] = []
-        for run in range(num_runs_per_instance):
-            save_path = f"results/{pop_size}/problem_{problem_id}_{run}.pkl"
-            # results_file = f"results/{pop_size}/problem_{problem_id}.pkl"
-            if rerun or not os.path.exists(save_path):
+    # If run_id is specified, only do that one run
+    if run_id is not None:
+        # Single run mode (for parallel jobs)
+        if run_id < 0 or run_id >= num_runs_per_instance:
+            print(f"Error: run_id {run_id} out of range [0, {num_runs_per_instance-1}]")
+            exit(1)
+        
+        print(f"Running single run_id: {run_id}")
+        
+        for problem_id in problems:
+            save_path = f"{save_path_}results/{pop_size}/problem_{problem_id}_{run_id}.pkl"
+            
+            # Check if results exist and skip if not rerunning
+            if not rerun and os.path.exists(save_path):
+                print(f"Results already exist for problem {problem_id}, run {run_id}. Skipping...")
+                continue
+            
+            try:
+                print(f"Running problem {problem_id}, run {run_id}...")
                 pareto, pop, best_f_vals = multi_objective_ea(problem_id, pop_size, budget, save_path=save_path)
-            else:
-                pareto, best_f_vals = load_results(problem_id, save_path=save_path)
+                print(f"Completed problem {problem_id}, run {run_id}")
+            except Exception as e:
+                print(f"Error running problem {problem_id}, run {run_id}: {e}")
+                continue
 
-            # plot_progress(best_f_vals, problem_id)
-            # plot_pareto_front_plotly(pareto, problem_id)
-            all_pareto[problem_id].append(pareto)
-            all_best_f_vals[problem_id].append(best_f_vals)
+    else:
+        # Original mode: run all
+        total_iterations = len(problems) * num_runs_per_instance
+        pbar = tqdm(total=total_iterations, desc="All Runs", ncols=100)
 
-            pbar.update(1)  # update the single progress bar
+        for problem_id in problems:
+            all_best_f_vals[problem_id] = []
+            all_pareto[problem_id] = []
+            
+            for run in range(num_runs_per_instance):
+                save_path = f"{save_path_}results/{pop_size}/problem_{problem_id}_{run}.pkl"
+                
+                # Check if results exist and skip if not rerunning
+                if not rerun and os.path.exists(save_path):
+                    try:
+                        pareto, best_f_vals = load_results(problem_id, save_path=save_path)
+                    except Exception as e:
+                        print(f"\nWarning: Could not load {save_path}: {e}. Re-running...")
+                        try:
+                            pareto, pop, best_f_vals = multi_objective_ea(problem_id, pop_size, budget, save_path=save_path)
+                        except Exception as e:
+                            print(f"\nError running problem {problem_id}, run {run}: {e}. Skipping...")
+                            pbar.update(1)
+                            continue
+                else:
+                    # Run the EA
+                    try:
+                        pareto, pop, best_f_vals = multi_objective_ea(problem_id, pop_size, budget, save_path=save_path)
+                    except Exception as e:
+                        print(f"\nError running problem {problem_id}, run {run}: {e}. Skipping to next problem...")
+                        pbar.update(num_runs_per_instance - run)
+                        break
 
-    pbar.close()
+                all_pareto[problem_id].append(pareto)
+                all_best_f_vals[problem_id].append(best_f_vals)
+                pbar.update(1)
+
+        pbar.close()
+    # args = parser.parse_args()
+    
+    # # --- Assign arguments ---
+    # pop_size = args.pop_size
+    # rerun = args.rerun
+    # save_path_ = args.save_path
+    # num_runs_per_instance = args.num_runs
+    # budget = args.budget
+    # instances = args.instances
+    # problems = args.problems
+
+    # # -- set other parameters, that dont change across experiments --
+    # all_best_f_vals = {}
+    # all_pareto = {}
+    # # num_runs_per_instance = 30
+    # # problems = [2100, 2101, 2102, 2103, 2200, 2201, 2202, 2203]
+    # # budget = 100000
+    # # instances = 30 #TODO
+    # if type(problems) == int:
+    #     problems = list(problems)
+
+    # total_iterations = len(problems) * num_runs_per_instance
+    # pbar = tqdm(total=total_iterations, desc="All Runs", ncols=100)
+
+    # for problem_id in problems:
+    #     all_best_f_vals[problem_id] = []
+    #     all_pareto[problem_id] = []
+        
+    #     for run in range(num_runs_per_instance):
+    #         save_path = f"{save_path_}results/{pop_size}/problem_{problem_id}_{run}.pkl"
+            
+    #         # Check if results exist and skip if not rerunning
+    #         if not rerun and os.path.exists(save_path):
+    #             try:
+    #                 pareto, best_f_vals = load_results(problem_id, save_path=save_path)
+    #             except Exception as e:
+    #                 print(f"\nWarning: Could not load {save_path}: {e}. Re-running...")
+    #                 try:
+    #                     pareto, pop, best_f_vals = multi_objective_ea(problem_id, pop_size, budget, save_path=save_path)
+    #                 except Exception as e:
+    #                     print(f"\nError running problem {problem_id}, run {run}: {e}. Skipping...")
+    #                     pbar.update(1)
+    #                     continue
+    #         else:
+    #             # Run the EA
+    #             try:
+    #                 pareto, pop, best_f_vals = multi_objective_ea(problem_id, pop_size, budget, save_path=save_path)
+    #             except Exception as e:
+    #                 print(f"\nError running problem {problem_id}, run {run}: {e}. Skipping to next problem...")
+    #                 # Skip remaining runs for this problem if instance doesn't exist
+    #                 pbar.update(num_runs_per_instance - run)
+    #                 break
+
+    #         all_pareto[problem_id].append(pareto)
+    #         all_best_f_vals[problem_id].append(best_f_vals)
+    #         pbar.update(1)
+
+    # pbar.close()
 
     # Plot all in small multiples
-    plot_progress_small_multiple(all_best_f_vals, problems)
-    plot_pareto_small_multiple(all_pareto, problems)
+    img_path = f"{save_path_}/results/img/{pop_size}/"
+    plot_progress_small_multiple(all_best_f_vals, problems, img_path=img_path)
+    plot_pareto_small_multiple(all_pareto, problems, img_path=img_path)
