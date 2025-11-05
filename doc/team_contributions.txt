@@ -37,4 +37,6 @@ Mercel:
     - Gathered all necessary data for analysis
 
 Raiyan:
-
+- Worked on Exercise 3 + 4
+    - Created fixed-budget plots for RLS, (1+1) EA, GA, GSEMO, Single and Multi Objective functions across all instances.
+    - Started and Completed the Analysis documents for Exercise 3 and 4, including analysing algorithm performance, stability, and trends.
